@@ -42,6 +42,7 @@ type App struct {
 	pages          *tview.Pages
 	header         HeaderComponent
 	footer         FooterComponent
+	dashboard      DashboardComponent
 	nodeList       NodeListComponent
 	vmList         VMListComponent
 	nodeDetails    NodeDetailsComponent
@@ -91,6 +92,14 @@ type App struct {
 func (a *App) removePageIfPresent(name string) {
 	if a.pages != nil && a.pages.HasPage(name) {
 		_ = a.pages.RemovePage(name)
+	}
+}
+
+// refreshDashboard updates the Home dashboard UI if it is enabled.
+// Must be called on the tview UI goroutine.
+func (a *App) refreshDashboard() {
+	if a.dashboard != nil {
+		a.dashboard.Refresh()
 	}
 }
 
@@ -221,6 +230,7 @@ func NewApp(ctx context.Context, client *api.Client, cfg *config.Config, configP
 	app.header = NewHeader()
 	app.footer = NewFooter()
 	app.footer.UpdateKeybindings(FormatFooterText(cfg.KeyBindings))
+	app.dashboard = NewDashboard()
 	app.nodeList = NewNodeList()
 	app.vmList = NewVMList()
 	app.nodeDetails = NewNodeDetails()
@@ -232,6 +242,7 @@ func NewApp(ctx context.Context, client *api.Client, cfg *config.Config, configP
 
 	// Set app reference for components that need it
 	app.header.SetApp(app.Application)
+	app.dashboard.SetApp(app)
 
 	// Show the active profile in the header
 	app.updateHeaderWithActiveProfile()
@@ -355,6 +366,8 @@ func NewApp(ctx context.Context, client *api.Client, cfg *config.Config, configP
 				}
 			}
 
+			app.refreshDashboard()
+
 			// Stop the loading indicator and show success notification briefly
 			app.header.StopLoading()
 			app.header.ShowSuccess("Guest agent data loaded")
@@ -423,7 +436,8 @@ func NewApp(ctx context.Context, client *api.Client, cfg *config.Config, configP
 
 	// Set the root and focus
 	app.SetRoot(app.mainLayout, true)
-	app.SetFocus(app.nodeList)
+	app.pages.SwitchToPage(api.PageHome)
+	app.SetFocus(app.dashboard)
 
 	// Start VNC session monitoring
 	app.startVNCSessionMonitoring()

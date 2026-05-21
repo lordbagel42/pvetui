@@ -118,6 +118,7 @@ type Config struct {
 	KeyBindings   KeyBindings                    `yaml:"key_bindings"`
 	Theme         ThemeConfig                    `yaml:"theme"`
 	Plugins       PluginConfig                   `yaml:"plugins"`
+	Homepage      HomepageConfig                 `yaml:"homepage,omitempty"`
 	ShowIcons     bool                           `yaml:"show_icons"`
 	GroupSettings map[string]GroupSettingsConfig `yaml:"group_settings,omitempty"`
 	// Deprecated: legacy single-profile fields for migration
@@ -150,6 +151,7 @@ func (c *Config) MarkSensitiveDataEncrypted() {
 type KeyBindings struct {
 	SwitchView          string `yaml:"switch_view"` // Switch between pages
 	SwitchViewReverse   string `yaml:"switch_view_reverse"`
+	HomePage            string `yaml:"home_page"`             // Jump to Home page
 	NodesPage           string `yaml:"nodes_page"`            // Jump to Nodes page
 	GuestsPage          string `yaml:"guests_page"`           // Jump to Guests page
 	TasksPage           string `yaml:"tasks_page"`            // Jump to Tasks page
@@ -166,6 +168,13 @@ type KeyBindings struct {
 	AdvancedGuestFilter string `yaml:"advanced_guest_filter"` // Open advanced guest filter modal
 	Help                string `yaml:"help"`                  // Toggle help modal
 	Quit                string `yaml:"quit"`                  // Quit application
+}
+
+// HomepageConfig defines optional configuration for the Home dashboard page.
+type HomepageConfig struct {
+	// NomadAddr enables Nomad statistics on the Home page when set.
+	// Example: "http://nomad-server.service.consul:4646" or "http://192.168.1.202:4646".
+	NomadAddr string `yaml:"nomad_addr,omitempty"`
 }
 
 // ThemeConfig defines theme-related configuration options.
@@ -225,6 +234,7 @@ func DefaultKeyBindings() KeyBindings {
 	return KeyBindings{
 		SwitchView:          "]",
 		SwitchViewReverse:   "[",
+		HomePage:            "Alt+0",
 		NodesPage:           "Alt+1",
 		GuestsPage:          "Alt+2",
 		TasksPage:           "Alt+3",
@@ -249,6 +259,7 @@ func keyBindingsToMap(kb KeyBindings) map[string]string {
 	return map[string]string{
 		"switch_view":           kb.SwitchView,
 		"switch_view_reverse":   kb.SwitchViewReverse,
+		"home_page":             kb.HomePage,
 		"nodes_page":            kb.NodesPage,
 		"guests_page":           kb.GuestsPage,
 		"tasks_page":            kb.TasksPage,
@@ -434,6 +445,7 @@ func (c *Config) MergeWithFile(path string) error {
 		KeyBindings    struct {
 			SwitchView          string `yaml:"switch_view"`
 			SwitchViewReverse   string `yaml:"switch_view_reverse"`
+			HomePage            string `yaml:"home_page"`
 			NodesPage           string `yaml:"nodes_page"`
 			GuestsPage          string `yaml:"guests_page"`
 			TasksPage           string `yaml:"tasks_page"`
@@ -672,6 +684,7 @@ func (c *Config) MergeWithFile(path string) error {
 	if kb := fileConfig.KeyBindings; kb != struct {
 		SwitchView          string `yaml:"switch_view"`
 		SwitchViewReverse   string `yaml:"switch_view_reverse"`
+		HomePage            string `yaml:"home_page"`
 		NodesPage           string `yaml:"nodes_page"`
 		GuestsPage          string `yaml:"guests_page"`
 		TasksPage           string `yaml:"tasks_page"`
@@ -696,6 +709,10 @@ func (c *Config) MergeWithFile(path string) error {
 
 		if kb.SwitchViewReverse != "" {
 			c.KeyBindings.SwitchViewReverse = kb.SwitchViewReverse
+		}
+
+		if kb.HomePage != "" {
+			c.KeyBindings.HomePage = kb.HomePage
 		}
 
 		if kb.NodesPage != "" {
@@ -1179,6 +1196,10 @@ func (c *Config) SetDefaults() {
 
 	if c.KeyBindings.SwitchViewReverse == "" {
 		c.KeyBindings.SwitchViewReverse = defaults.SwitchViewReverse
+	}
+
+	if c.KeyBindings.HomePage == "" {
+		c.KeyBindings.HomePage = defaults.HomePage
 	}
 
 	if c.KeyBindings.NodesPage == "" {

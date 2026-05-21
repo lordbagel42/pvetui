@@ -55,7 +55,8 @@ func FormatFooterText(keys config.KeyBindings) string {
 	}
 
 	return fmt.Sprintf(
-		"[%s]%s:[%s]Nodes  [%s]%s:[%s]Guests  [%s]%s:[%s]Tasks  [%s]%s:[%s]Storage  [%s]%s:[%s]Search  [%s]%s:[%s]Global  [%s]%s:[%s]Context  [%s]Space:[%s]Select  [%s]%s:[%s]Help  [%s]%s:[%s]Quit",
+		"[%s]%s:[%s]Home  [%s]%s:[%s]Nodes  [%s]%s:[%s]Guests  [%s]%s:[%s]Tasks  [%s]%s:[%s]Storage  [%s]%s:[%s]Search  [%s]%s:[%s]Global  [%s]%s:[%s]Context  [%s]Space:[%s]Select  [%s]%s:[%s]Help  [%s]%s:[%s]Quit",
+		theme.Colors.HeaderText, keys.HomePage, theme.Colors.Primary,
 		theme.Colors.HeaderText, keys.NodesPage, theme.Colors.Primary,
 		theme.Colors.HeaderText, keys.GuestsPage, theme.Colors.Primary,
 		theme.Colors.HeaderText, keys.TasksPage, theme.Colors.Primary,

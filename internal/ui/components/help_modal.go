@@ -67,7 +67,8 @@ func buildHelpText(keys config.KeyBindings) string {
 	}{
 		{Cat: "[warning]Navigation[-]"},
 		{Key: "Arrow Keys / hjkl", Desc: "Navigate lists and panels"},
-		{Key: fmt.Sprintf("%s / %s", keys.SwitchView, keys.SwitchViewReverse), Desc: "Switch between views (forward/reverse, including Storage)"},
+		{Key: fmt.Sprintf("%s / %s", keys.SwitchView, keys.SwitchViewReverse), Desc: "Switch between views (Home, Nodes, Guests, Tasks, Storage)"},
+		{Key: keys.HomePage, Desc: "Switch to Home tab"},
 		{Key: keys.NodesPage, Desc: "Switch to Nodes tab"},
 		{Key: keys.GuestsPage, Desc: "Switch to Guests tab"},
 		{Key: keys.TasksPage, Desc: "Switch to Tasks tab"},

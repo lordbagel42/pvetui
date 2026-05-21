@@ -68,6 +68,12 @@ type ClusterStatusComponent interface {
 	SetApp(*App)
 }
 
+type DashboardComponent interface {
+	tview.Primitive
+	SetApp(*App)
+	Refresh()
+}
+
 type HeaderComponent interface {
 	tview.Primitive
 	SetApp(*tview.Application)

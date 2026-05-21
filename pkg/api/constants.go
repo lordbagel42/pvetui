@@ -48,6 +48,7 @@ const (
 
 // UI Pages.
 const (
+	PageHome    = "Home"
 	PageNodes   = "Nodes"
 	PageGuests  = "Guests"
 	PageTasks   = "Tasks"

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Home dashboard**: New Home page with live cluster telemetry (nodes/guests/tasks), trend sparklines, and optional Nomad stats when `homepage.nomad_addr` is configured. Default keybinding: `Alt+0`.
+
 ## [1.3.3] - 2026-05-09
 
 ### Added

@@ -186,6 +186,9 @@ func (a *App) setupKeyboardHandlers() {
 		if keyMatch(event, a.config.KeyBindings.SwitchView) {
 			currentPage, _ := a.pages.GetFrontPage()
 			switch currentPage {
+			case api.PageHome:
+				a.pages.SwitchToPage(api.PageNodes)
+				a.SetFocus(a.nodeList)
 			case api.PageNodes:
 				a.pages.SwitchToPage(api.PageGuests)
 				a.SetFocus(a.vmList)
@@ -194,9 +197,12 @@ func (a *App) setupKeyboardHandlers() {
 				a.SetFocus(a.tasksList)
 			case api.PageTasks:
 				a.showStorageBrowser(nil)
+			case api.PageStorage:
+				a.pages.SwitchToPage(api.PageHome)
+				a.SetFocus(a.dashboard)
 			default:
-				a.pages.SwitchToPage(api.PageNodes)
-				a.SetFocus(a.nodeList)
+				a.pages.SwitchToPage(api.PageHome)
+				a.SetFocus(a.dashboard)
 			}
 
 			return nil
@@ -205,6 +211,8 @@ func (a *App) setupKeyboardHandlers() {
 		if keyMatch(event, a.config.KeyBindings.SwitchViewReverse) {
 			currentPage, _ := a.pages.GetFrontPage()
 			switch currentPage {
+			case api.PageHome:
+				a.showStorageBrowser(nil)
 			case api.PageTasks:
 				a.pages.SwitchToPage(api.PageGuests)
 				a.SetFocus(a.vmList)
@@ -214,9 +222,20 @@ func (a *App) setupKeyboardHandlers() {
 			case api.PageGuests:
 				a.pages.SwitchToPage(api.PageNodes)
 				a.SetFocus(a.nodeList)
-			default: // PageNodes
-				a.showStorageBrowser(nil)
+			case api.PageNodes:
+				a.pages.SwitchToPage(api.PageHome)
+				a.SetFocus(a.dashboard)
+			default:
+				a.pages.SwitchToPage(api.PageHome)
+				a.SetFocus(a.dashboard)
 			}
+
+			return nil
+		}
+
+		if keyMatch(event, a.config.KeyBindings.HomePage) {
+			a.pages.SwitchToPage(api.PageHome)
+			a.SetFocus(a.dashboard)
 
 			return nil
 		}
@@ -266,6 +285,10 @@ func (a *App) setupKeyboardHandlers() {
 
 		if keyMatch(event, a.config.KeyBindings.Search) {
 			currentPage, _ := a.pages.GetFrontPage()
+			if currentPage == api.PageHome {
+				a.showMessageSafe("Search is not available on the Home page; switch to Nodes, Guests, or Tasks")
+				return nil
+			}
 			if currentPage == api.PageStorage {
 				a.showMessageSafe("Search is not implemented for the Storage page yet")
 				return nil

@@ -359,7 +359,7 @@ Windows legacy fallback:
 
 | Key | Action | Key | Action |
 |-----|--------|-----|--------|
-| `h j k l` | Navigate | `Alt+1/2/3` | Switch views |
+| `h j k l` | Navigate | `Alt+0/1/2/3/4` | Switch views |
 | `Enter` | Select | `[ ]` | Previous/Next view |
 | `s` | SSH Shell | `v` | VNC Console |
 | `m` | Context Menu | `g` | Global Menu |

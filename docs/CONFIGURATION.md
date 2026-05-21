@@ -69,9 +69,11 @@ age_dir: "/custom/age/path"      # Optional: overrides where age keys are stored
 key_bindings:
   switch_view: "]"
   switch_view_reverse: "["
+  home_page: "Alt+0"
   nodes_page: "Alt+1"
   guests_page: "Alt+2"
   tasks_page: "Alt+3"
+  storage_page: "Alt+4"
   tasks_toggle_queue: "t"
   task_stop_cancel: "x"
   menu: "m"
@@ -183,9 +185,11 @@ pvetui supports fully customizable key bindings through the `key_bindings` secti
 |--------|-------------|-------------|
 | `switch_view` | `]` | Switch to next view |
 | `switch_view_reverse` | `[` | Switch to previous view |
+| `home_page` | `Alt+0` | Jump to Home page |
 | `nodes_page` | `Alt+1` | Jump to Nodes page |
 | `guests_page` | `Alt+2` | Jump to Guests page |
 | `tasks_page` | `Alt+3` | Jump to Tasks page |
+| `storage_page` | `Alt+4` | Jump to Storage page |
 | `tasks_toggle_queue` | `t` | Toggle active queue panel visibility in Tasks page |
 | `task_stop_cancel` | `x` | Stop running task / cancel queued task in active queue |
 | `menu` | `m` | Open context menu |
@@ -204,9 +208,11 @@ pvetui supports fully customizable key bindings through the `key_bindings` secti
 key_bindings:
   switch_view: "Ctrl+n"
   switch_view_reverse: "Ctrl+p"
-  nodes_page: "F1"
-  guests_page: "F2"
-  tasks_page: "F3"
+  home_page: "F1"
+  nodes_page: "F2"
+  guests_page: "F3"
+  tasks_page: "F4"
+  storage_page: "F5"
   tasks_toggle_queue: "t"
   task_stop_cancel: "x"
   menu: "Space"
@@ -339,6 +345,15 @@ show_icons: false
 
 Equivalent environment variable: `PVETUI_SHOW_ICONS=false`
 Equivalent CLI flag: `--show-icons=false`
+
+### Home Dashboard
+
+Enable optional Nomad statistics on the Home page:
+
+```yaml
+homepage:
+  nomad_addr: "http://192.168.1.202:4646"
+```
 
 ### Encrypted Configuration
 

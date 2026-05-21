@@ -26,9 +26,11 @@ show_icons: true
 key_bindings:
   switch_view: "]"
   switch_view_reverse: "["
+  home_page: "Alt+0"
   nodes_page: "Alt+1"
   guests_page: "Alt+2"
   tasks_page: "Alt+3"
+  storage_page: "Alt+4"
   tasks_toggle_queue: t
   task_stop_cancel: x
   menu: m
@@ -43,6 +45,10 @@ key_bindings:
   quit: q
 # Reserved keys (h, j, k, l, arrows, Tab, Enter, Esc, Backspace) cannot be reassigned.
 # System combos like Ctrl+C, Ctrl+D and Ctrl+Z are also blocked.
+
+# Optional Home page integrations
+# homepage:
+#   nomad_addr: "http://192.168.1.202:4646"
 
 # Theme configuration
 theme:

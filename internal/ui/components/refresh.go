@@ -250,6 +250,8 @@ func (a *App) doFastRefresh(token uint64) {
 					}
 				}
 
+				a.refreshDashboard()
+
 				if enrichErr != nil {
 					a.header.ShowWarning("Guest agent enrichment partially failed")
 				} else {
@@ -332,6 +334,7 @@ func (a *App) applyInitialClusterUpdate(cluster *api.Cluster) {
 
 		// Update cluster summary/status
 		a.clusterStatus.Update(cluster)
+		a.refreshDashboard()
 	})
 }
 
@@ -452,6 +455,7 @@ func (a *App) doEnrichNodes(cluster *api.Cluster, refreshClient *api.Client, tok
 			}
 
 			a.restoreSearchUI(snap.searchWasActive, nodeSearchState, vmSearchState)
+			a.refreshDashboard()
 			if showFinalMessage {
 				// Manual refresh path: no VM enrichment callback follows, so show success here.
 				a.header.ShowSuccess("Data refreshed successfully")
@@ -573,6 +577,7 @@ func (a *App) enrichGroupNodesParallel(token uint64, nodes []*api.Node, hasSelec
 			a.syncStorageBrowserNodes()
 			a.vmList.SetVMs(models.GlobalState.FilteredVMs)
 			a.clusterStatus.Update(a.getDisplayCluster())
+			a.refreshDashboard()
 
 			// Show appropriate success message based on context
 			if isInitialLoad {
@@ -705,6 +710,8 @@ func (a *App) loadTasksData() {
 					// No filter, use original data
 					a.tasksList.SetTasks(tasks)
 				}
+
+				a.refreshDashboard()
 			})
 		}
 	}()
