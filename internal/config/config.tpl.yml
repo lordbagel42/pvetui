@@ -26,9 +26,11 @@ show_icons: true
 key_bindings:
   switch_view: "]"
   switch_view_reverse: "["
-  nodes_page: "Alt+1"
-  guests_page: "Alt+2"
-  tasks_page: "Alt+3"
+  home_page: "Alt+1"
+  nodes_page: "Alt+2"
+  guests_page: "Alt+3"
+  tasks_page: "Alt+4"
+  storage_page: "Alt+5"
   tasks_toggle_queue: t
   task_stop_cancel: x
   menu: m

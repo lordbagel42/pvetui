@@ -9,6 +9,9 @@ import (
 
 // createMainLayout builds the main application layout.
 func (a *App) createMainLayout() *tview.Flex {
+	// Setup Home page
+	homePage := a.homeDashboard
+
 	// Setup nodes page
 	nodesPage := tview.NewFlex().
 		AddItem(a.nodeList, 0, 1, true).
@@ -26,7 +29,8 @@ func (a *App) createMainLayout() *tview.Flex {
 	storagePage := a.storageBrowser
 
 	// Add pages
-	a.pages.AddPage(api.PageNodes, nodesPage, true, true)
+	a.pages.AddPage(api.PageHome, homePage, true, true)
+	a.pages.AddPage(api.PageNodes, nodesPage, true, false)
 	a.pages.AddPage(api.PageGuests, vmsPage, true, false)
 	a.pages.AddPage(api.PageTasks, tasksPage, true, false)
 	a.pages.AddPage(api.PageStorage, storagePage, true, false)
@@ -42,6 +46,9 @@ func (a *App) createMainLayout() *tview.Flex {
 
 // setupComponentConnections wires up the interactions between components.
 func (a *App) setupComponentConnections() {
+	// Configure home dashboard
+	a.homeDashboard.SetApp(a)
+
 	// Set app reference for cluster status
 	a.clusterStatus.SetApp(a)
 

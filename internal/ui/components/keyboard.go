@@ -186,6 +186,9 @@ func (a *App) setupKeyboardHandlers() {
 		if keyMatch(event, a.config.KeyBindings.SwitchView) {
 			currentPage, _ := a.pages.GetFrontPage()
 			switch currentPage {
+			case api.PageHome:
+				a.pages.SwitchToPage(api.PageNodes)
+				a.SetFocus(a.nodeList)
 			case api.PageNodes:
 				a.pages.SwitchToPage(api.PageGuests)
 				a.SetFocus(a.vmList)
@@ -195,8 +198,8 @@ func (a *App) setupKeyboardHandlers() {
 			case api.PageTasks:
 				a.showStorageBrowser(nil)
 			default:
-				a.pages.SwitchToPage(api.PageNodes)
-				a.SetFocus(a.nodeList)
+				a.pages.SwitchToPage(api.PageHome)
+				a.SetFocus(a.homeDashboard)
 			}
 
 			return nil
@@ -205,6 +208,8 @@ func (a *App) setupKeyboardHandlers() {
 		if keyMatch(event, a.config.KeyBindings.SwitchViewReverse) {
 			currentPage, _ := a.pages.GetFrontPage()
 			switch currentPage {
+			case api.PageHome:
+				a.showStorageBrowser(nil)
 			case api.PageTasks:
 				a.pages.SwitchToPage(api.PageGuests)
 				a.SetFocus(a.vmList)
@@ -215,8 +220,16 @@ func (a *App) setupKeyboardHandlers() {
 				a.pages.SwitchToPage(api.PageNodes)
 				a.SetFocus(a.nodeList)
 			default: // PageNodes
-				a.showStorageBrowser(nil)
+				a.pages.SwitchToPage(api.PageHome)
+				a.SetFocus(a.homeDashboard)
 			}
+
+			return nil
+		}
+
+		if keyMatch(event, a.config.KeyBindings.HomePage) {
+			a.pages.SwitchToPage(api.PageHome)
+			a.SetFocus(a.homeDashboard)
 
 			return nil
 		}
@@ -266,6 +279,10 @@ func (a *App) setupKeyboardHandlers() {
 
 		if keyMatch(event, a.config.KeyBindings.Search) {
 			currentPage, _ := a.pages.GetFrontPage()
+			if currentPage == api.PageHome {
+				a.showMessageSafe("Search is not implemented for the Home page")
+				return nil
+			}
 			if currentPage == api.PageStorage {
 				a.showMessageSafe("Search is not implemented for the Storage page yet")
 				return nil

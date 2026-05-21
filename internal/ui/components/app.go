@@ -49,6 +49,7 @@ type App struct {
 	tasksList      TasksListComponent
 	storageBrowser StorageBrowserComponent
 	clusterStatus  ClusterStatusComponent
+	homeDashboard  *HomeDashboard
 	helpModal      *HelpModal
 	mainLayout     *tview.Flex
 	searchInput    *tview.InputField
@@ -228,6 +229,7 @@ func NewApp(ctx context.Context, client *api.Client, cfg *config.Config, configP
 	app.tasksList = NewTasksList()
 	app.storageBrowser = NewStorageBrowser()
 	app.clusterStatus = NewClusterStatus()
+	app.homeDashboard = NewHomeDashboard()
 	app.helpModal = NewHelpModal(cfg.KeyBindings)
 
 	// Set app reference for components that need it
@@ -423,7 +425,7 @@ func NewApp(ctx context.Context, client *api.Client, cfg *config.Config, configP
 
 	// Set the root and focus
 	app.SetRoot(app.mainLayout, true)
-	app.SetFocus(app.nodeList)
+	app.SetFocus(app.homeDashboard)
 
 	// Start VNC session monitoring
 	app.startVNCSessionMonitoring()

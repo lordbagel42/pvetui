@@ -150,6 +150,7 @@ func (c *Config) MarkSensitiveDataEncrypted() {
 type KeyBindings struct {
 	SwitchView          string `yaml:"switch_view"` // Switch between pages
 	SwitchViewReverse   string `yaml:"switch_view_reverse"`
+	HomePage            string `yaml:"home_page"`             // Jump to Home page
 	NodesPage           string `yaml:"nodes_page"`            // Jump to Nodes page
 	GuestsPage          string `yaml:"guests_page"`           // Jump to Guests page
 	TasksPage           string `yaml:"tasks_page"`            // Jump to Tasks page
@@ -225,10 +226,11 @@ func DefaultKeyBindings() KeyBindings {
 	return KeyBindings{
 		SwitchView:          "]",
 		SwitchViewReverse:   "[",
-		NodesPage:           "Alt+1",
-		GuestsPage:          "Alt+2",
-		TasksPage:           "Alt+3",
-		StoragePage:         "Alt+4",
+		HomePage:            "Alt+1",
+		NodesPage:           "Alt+2",
+		GuestsPage:          "Alt+3",
+		TasksPage:           "Alt+4",
+		StoragePage:         "Alt+5",
 		TasksToggleQueue:    "t",
 		TaskStopCancel:      "x",
 		Menu:                "m",
@@ -249,6 +251,7 @@ func keyBindingsToMap(kb KeyBindings) map[string]string {
 	return map[string]string{
 		"switch_view":           kb.SwitchView,
 		"switch_view_reverse":   kb.SwitchViewReverse,
+		"home_page":             kb.HomePage,
 		"nodes_page":            kb.NodesPage,
 		"guests_page":           kb.GuestsPage,
 		"tasks_page":            kb.TasksPage,
@@ -434,6 +437,7 @@ func (c *Config) MergeWithFile(path string) error {
 		KeyBindings    struct {
 			SwitchView          string `yaml:"switch_view"`
 			SwitchViewReverse   string `yaml:"switch_view_reverse"`
+			HomePage            string `yaml:"home_page"`
 			NodesPage           string `yaml:"nodes_page"`
 			GuestsPage          string `yaml:"guests_page"`
 			TasksPage           string `yaml:"tasks_page"`
@@ -672,6 +676,7 @@ func (c *Config) MergeWithFile(path string) error {
 	if kb := fileConfig.KeyBindings; kb != struct {
 		SwitchView          string `yaml:"switch_view"`
 		SwitchViewReverse   string `yaml:"switch_view_reverse"`
+		HomePage            string `yaml:"home_page"`
 		NodesPage           string `yaml:"nodes_page"`
 		GuestsPage          string `yaml:"guests_page"`
 		TasksPage           string `yaml:"tasks_page"`
@@ -696,6 +701,9 @@ func (c *Config) MergeWithFile(path string) error {
 
 		if kb.SwitchViewReverse != "" {
 			c.KeyBindings.SwitchViewReverse = kb.SwitchViewReverse
+		}
+		if kb.HomePage != "" {
+			c.KeyBindings.HomePage = kb.HomePage
 		}
 
 		if kb.NodesPage != "" {
