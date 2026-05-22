@@ -55,43 +55,32 @@ func newDashboardView(app *components.App, nomadClient *nomad.Client, refreshSec
 
 // build assembles the tview layout once.
 func (v *dashboardView) build() {
-	// Title bar
 	v.titleBar = tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter)
 	v.titleBar.SetBackgroundColor(tcell.ColorDefault)
 
-	// Nodes panel
 	v.nodesView = newPanel(" ◈ NODES ")
-
-	// Cluster summary panel
 	v.summaryView = newPanel(" ◈ CLUSTER ")
 
-	// Nomad / extended panel
 	if v.nomadClient != nil {
 		v.nomadView = newPanel(" ◈ NOMAD JOBS ")
 	} else {
 		v.nomadView = newPanel(" ◈ RESOURCE MAP ")
 	}
 
-	// Guests panel
 	v.guestsView = newPanel(" ◈ GUESTS ")
-
-	// Tasks panel
 	v.tasksView = newPanel(" ◈ RECENT TASKS ")
 
-	// Top row: nodes | summary | nomad
 	topRow := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(v.nodesView, 0, 3, false).
 		AddItem(v.summaryView, 0, 2, false).
 		AddItem(v.nomadView, 0, 4, false)
 
-	// Bottom row: guests | tasks
 	bottomRow := tview.NewFlex().SetDirection(tview.FlexColumn).
 		AddItem(v.guestsView, 0, 5, false).
 		AddItem(v.tasksView, 0, 3, false)
 
-	// Main layout
 	v.layout = tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(v.titleBar, 1, 0, false).
 		AddItem(topRow, 0, 5, false).
@@ -119,13 +108,11 @@ func (v *dashboardView) show() {
 	v.stopCh = make(chan struct{})
 	v.refreshCountdown = v.refreshSecs
 
-	// Render immediately before showing
 	v.renderAll(nil)
 
 	v.app.Pages().AddPage(dashboardPageName, v.layout, true, true)
 	v.app.SetFocus(v.layout)
 
-	// Capture all keyboard input while dashboard is visible
 	v.app.SetHotkeyOverride(func(event *tcell.EventKey) *tcell.EventKey {
 		switch {
 		case event.Key() == tcell.KeyEscape,
@@ -135,7 +122,7 @@ func (v *dashboardView) show() {
 			v.triggerRefresh()
 		}
 
-		return nil // swallow all keys
+		return nil
 	})
 
 	v.startBackground()
@@ -153,7 +140,6 @@ func (v *dashboardView) stop() {
 	if v.stopCh != nil {
 		select {
 		case <-v.stopCh:
-			// already closed
 		default:
 			close(v.stopCh)
 		}
@@ -184,7 +170,6 @@ func (v *dashboardView) startBackground() {
 					v.refreshCountdown = v.refreshSecs
 					go v.fetchAndDraw()
 				} else {
-					// Just update the title bar countdown
 					v.app.QueueUpdateDraw(func() {
 						v.titleBar.SetText(v.renderTitle())
 					})
@@ -232,7 +217,7 @@ func (v *dashboardView) renderAll(jobs []nomad.Job) {
 	v.tasksView.SetText(v.renderTasks())
 }
 
-// ─── Render helpers ──────────────────────────────────────────────────────────
+// ─── Render helpers ───────────────────────────────────────────────────────────
 
 func (v *dashboardView) renderTitle() string {
 	now := time.Now().Format("Mon 02 Jan 2006  15:04:05")
@@ -273,17 +258,17 @@ func (v *dashboardView) renderNodes() string {
 			statusLabel = "[red]OFFLN[-]"
 		}
 
-		sb.WriteString(fmt.Sprintf("\n %s [white::b]%-12s[-] %s\n",
-			onlineDot, truncate(node.Name, 12), statusLabel))
+		fmt.Fprintf(&sb, "\n %s [white::b]%-12s[-] %s\n",
+			onlineDot, truncate(node.Name, 12), statusLabel)
 
 		if node.Online {
 			cpuPct := node.CPUUsage * 100
 			memPct := utils.CalculatePercentage(node.MemoryUsed, node.MemoryTotal)
 
-			sb.WriteString(fmt.Sprintf("   [gray]CPU[gray] %s [%s]%4.1f%%[-]\n",
-				progressBar(cpuPct, 10), barColorName(cpuPct), cpuPct))
-			sb.WriteString(fmt.Sprintf("   [gray]MEM[gray] %s [%s]%4.1f%%[-]\n",
-				progressBar(memPct, 10), barColorName(memPct), memPct))
+			fmt.Fprintf(&sb, "   [gray]CPU[gray] %s [%s]%4.1f%%[-]\n",
+				progressBar(cpuPct, 10), barColorName(cpuPct), cpuPct)
+			fmt.Fprintf(&sb, "   [gray]MEM[gray] %s [%s]%4.1f%%[-]\n",
+				progressBar(memPct, 10), barColorName(memPct), memPct)
 		} else {
 			sb.WriteString("   [gray]CPU [----------]   N/A[-]\n")
 			sb.WriteString("   [gray]MEM [----------]   N/A[-]\n")
@@ -298,12 +283,12 @@ func (v *dashboardView) renderSummary() string {
 	vms := models.GlobalState.OriginalVMs
 
 	var (
-		onlineNodes                         int
-		totalCPU, usedCPU                   float64
-		totalMem, usedMem                   float64
-		totalStorage, usedStorage           int64
-		runningVMs, stoppedVMs, runningCTs  int
-		stoppedCTs                          int
+		onlineNodes                        int
+		totalCPU, usedCPU                  float64
+		totalMem, usedMem                  float64
+		totalStorage, usedStorage          int64
+		runningVMs, stoppedVMs, runningCTs int
+		stoppedCTs                         int
 	)
 
 	for _, n := range nodes {
@@ -343,24 +328,24 @@ func (v *dashboardView) renderSummary() string {
 
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf("\n  [gray]Nodes   [white]%d[gray]/[white]%d[-] online\n\n",
-		onlineNodes, len(nodes)))
+	fmt.Fprintf(&sb, "\n  [gray]Nodes   [white]%d[gray]/[white]%d[-] online\n\n",
+		onlineNodes, len(nodes))
 
-	sb.WriteString(fmt.Sprintf("  [aqua]CPU[-]  %s\n", progressBar(cpuPct, 12)))
-	sb.WriteString(fmt.Sprintf("  [gray]     [%s]%4.1f%%[-] / %.0f cores\n\n",
-		barColorName(cpuPct), cpuPct, totalCPU))
+	fmt.Fprintf(&sb, "  [aqua]CPU[-]  %s\n", progressBar(cpuPct, 12))
+	fmt.Fprintf(&sb, "  [gray]     [%s]%4.1f%%[-] / %.0f cores\n\n",
+		barColorName(cpuPct), cpuPct, totalCPU)
 
-	sb.WriteString(fmt.Sprintf("  [aqua]MEM[-]  %s\n", progressBar(memPct, 12)))
-	sb.WriteString(fmt.Sprintf("  [gray]     [%s]%4.1f%%[-] / %s\n\n",
-		barColorName(memPct), memPct, utils.FormatBytesFloat(totalMem)))
+	fmt.Fprintf(&sb, "  [aqua]MEM[-]  %s\n", progressBar(memPct, 12))
+	fmt.Fprintf(&sb, "  [gray]     [%s]%4.1f%%[-] / %s\n\n",
+		barColorName(memPct), memPct, utils.FormatBytesFloat(totalMem))
 
-	sb.WriteString(fmt.Sprintf("  [aqua]STO[-]  %s\n", progressBar(stoPct, 12)))
-	sb.WriteString(fmt.Sprintf("  [gray]     [%s]%4.1f%%[-] / %s\n\n",
-		barColorName(stoPct), stoPct, utils.FormatBytes(totalStorage)))
+	fmt.Fprintf(&sb, "  [aqua]STO[-]  %s\n", progressBar(stoPct, 12))
+	fmt.Fprintf(&sb, "  [gray]     [%s]%4.1f%%[-] / %s\n\n",
+		barColorName(stoPct), stoPct, utils.FormatBytes(totalStorage))
 
-	sb.WriteString(fmt.Sprintf("  [gray]──────────────────[-]\n"))
-	sb.WriteString(fmt.Sprintf("  [green]VM[-][gray] run[white] %2d[-]  stp[white] %2d[-]\n", runningVMs, stoppedVMs))
-	sb.WriteString(fmt.Sprintf("  [aqua]CT[-][gray] run[white] %2d[-]  stp[white] %2d[-]\n", runningCTs, stoppedCTs))
+	sb.WriteString("  [gray]──────────────────[-]\n")
+	fmt.Fprintf(&sb, "  [green]VM[-][gray] run[white] %2d[-]  stp[white] %2d[-]\n", runningVMs, stoppedVMs)
+	fmt.Fprintf(&sb, "  [aqua]CT[-][gray] run[white] %2d[-]  stp[white] %2d[-]\n", runningCTs, stoppedCTs)
 
 	return sb.String()
 }
@@ -382,7 +367,6 @@ func (v *dashboardView) renderNomadJobs(jobs []nomad.Job) string {
 		return "\n  [gray]No jobs found[-]"
 	}
 
-	// Sort: running first, then pending, then dead; alpha within groups
 	sort.Slice(jobs, func(i, j int) bool {
 		si, sj := jobStatusOrder(jobs[i].Status), jobStatusOrder(jobs[j].Status)
 		if si != sj {
@@ -394,8 +378,7 @@ func (v *dashboardView) renderNomadJobs(jobs []nomad.Job) string {
 	var sb strings.Builder
 
 	sb.WriteString("\n")
-	sb.WriteString(fmt.Sprintf("  [aqua]%-18s %-7s %-7s %-6s[-]\n",
-		"NAME", "TYPE", "STATUS", "ALLOCS"))
+	fmt.Fprintf(&sb, "  [aqua]%-18s %-7s %-7s %-6s[-]\n", "NAME", "TYPE", "STATUS", "ALLOCS")
 	sb.WriteString("  [gray]────────────────────────────────────[-]\n")
 
 	for _, j := range jobs {
@@ -406,15 +389,14 @@ func (v *dashboardView) renderNomadJobs(jobs []nomad.Job) string {
 			allocs = fmt.Sprintf("[gray]%d/%d[-]", j.Allocs.Running, j.Allocs.Total())
 		}
 
-		sb.WriteString(fmt.Sprintf("  %s [white]%-18s[-] [gray]%-7s[-] %s %-6s\n",
-			dot, truncate(j.Name, 18), typeAbbr, statusStr, allocs))
+		fmt.Fprintf(&sb, "  %s [white]%-18s[-] [gray]%-7s[-] %s %-6s\n",
+			dot, truncate(j.Name, 18), typeAbbr, statusStr, allocs)
 	}
 
 	return sb.String()
 }
 
 func (v *dashboardView) renderResourceMap() string {
-	// Show per-node guest distribution when Nomad is not configured
 	nodes := models.GlobalState.OriginalNodes
 	vms := models.GlobalState.OriginalVMs
 
@@ -422,7 +404,6 @@ func (v *dashboardView) renderResourceMap() string {
 		return "\n  [gray]Loading...[-]"
 	}
 
-	// Count guests per node
 	guestsByNode := make(map[string][]*api.VM)
 	for _, vm := range vms {
 		if vm != nil {
@@ -452,12 +433,12 @@ func (v *dashboardView) renderResourceMap() string {
 			dot = "[red]○[-]"
 		}
 
-		sb.WriteString(fmt.Sprintf(" %s [white::b]%s[-]\n", dot, node.Name))
-		sb.WriteString(fmt.Sprintf("   [green]▶ %2d running[-]  [gray]■ %2d stopped[-]\n\n", running, stopped))
+		fmt.Fprintf(&sb, " %s [white::b]%s[-]\n", dot, node.Name)
+		fmt.Fprintf(&sb, "   [green]▶ %2d running[-]  [gray]■ %2d stopped[-]\n\n", running, stopped)
 
 		for i, g := range guests {
 			if i >= 6 {
-				sb.WriteString(fmt.Sprintf("   [gray]... %d more[-]\n", len(guests)-6))
+				fmt.Fprintf(&sb, "   [gray]... %d more[-]\n", len(guests)-6)
 				break
 			}
 			gDot := vmStatusMark(g.Status)
@@ -465,7 +446,7 @@ func (v *dashboardView) renderResourceMap() string {
 			if g.Type == api.VMTypeLXC {
 				typeTag = "[aqua]CT[-]"
 			}
-			sb.WriteString(fmt.Sprintf("   %s %s [gray]%s[-]\n", gDot, typeTag, truncate(g.Name, 16)))
+			fmt.Fprintf(&sb, "   %s %s [gray]%s[-]\n", gDot, typeTag, truncate(g.Name, 16))
 		}
 	}
 
@@ -478,7 +459,6 @@ func (v *dashboardView) renderGuests() string {
 		return "\n  [gray]Loading guest data...[-]"
 	}
 
-	// Sort: running first (by CPU desc), then stopped
 	running := make([]*api.VM, 0)
 	stopped := make([]*api.VM, 0)
 
@@ -502,8 +482,8 @@ func (v *dashboardView) renderGuests() string {
 
 	var sb strings.Builder
 	sb.WriteString("\n")
-	sb.WriteString(fmt.Sprintf("  [aqua]%-4s %-5s %-20s %-8s  %-22s  %-22s[-]\n",
-		"TYPE", "ID", "NAME", "NODE", "CPU", "MEM"))
+	fmt.Fprintf(&sb, "  [aqua]%-4s %-5s %-20s %-8s  %-22s  %-22s[-]\n",
+		"TYPE", "ID", "NAME", "NODE", "CPU", "MEM")
 	sb.WriteString("  [gray]──────────────────────────────────────────────────────────────────────────────[-]\n")
 
 	for _, vm := range running {
@@ -516,7 +496,7 @@ func (v *dashboardView) renderGuests() string {
 		sb.WriteString("  [gray]── stopped ─────────────────────────────────────────────────────────────────────[-]\n")
 		for i, vm := range stopped {
 			if i >= 8 {
-				sb.WriteString(fmt.Sprintf("  [gray]  ... %d more stopped[-]\n", len(stopped)-8))
+				fmt.Fprintf(&sb, "  [gray]  ... %d more stopped[-]\n", len(stopped)-8)
 				break
 			}
 			renderStoppedRow(&sb, vm)
@@ -535,8 +515,8 @@ func renderGuestRow(sb *strings.Builder, vm *api.VM, cpuPct, memPct float64) {
 	cpuBar := fmt.Sprintf("%s [%s]%4.1f%%[-]", progressBar(cpuPct, 8), barColorName(cpuPct), cpuPct)
 	memBar := fmt.Sprintf("%s [%s]%4.1f%%[-]", progressBar(memPct, 8), barColorName(memPct), memPct)
 
-	sb.WriteString(fmt.Sprintf("  %s [gray]%-5d[-] [white]%-20s[-] [gray]%-8s[-]  %s  %s\n",
-		typeStr, vm.ID, truncate(vm.Name, 20), truncate(vm.Node, 8), cpuBar, memBar))
+	fmt.Fprintf(sb, "  %s [gray]%-5d[-] [white]%-20s[-] [gray]%-8s[-]  %s  %s\n",
+		typeStr, vm.ID, truncate(vm.Name, 20), truncate(vm.Node, 8), cpuBar, memBar)
 }
 
 func renderStoppedRow(sb *strings.Builder, vm *api.VM) {
@@ -545,8 +525,8 @@ func renderStoppedRow(sb *strings.Builder, vm *api.VM) {
 		typeStr = "[gray]CT[-]"
 	}
 
-	sb.WriteString(fmt.Sprintf("  %s [gray]%-5d %-20s %-8s  ■ stopped[-]\n",
-		typeStr, vm.ID, truncate(vm.Name, 20), truncate(vm.Node, 8)))
+	fmt.Fprintf(sb, "  %s [gray]%-5d %-20s %-8s  ■ stopped[-]\n",
+		typeStr, vm.ID, truncate(vm.Name, 20), truncate(vm.Node, 8))
 }
 
 func (v *dashboardView) renderTasks() string {
@@ -557,10 +537,9 @@ func (v *dashboardView) renderTasks() string {
 
 	var sb strings.Builder
 	sb.WriteString("\n")
-	sb.WriteString(fmt.Sprintf("  [aqua]%-12s %-14s %-8s %-10s[-]\n", "STATUS", "TYPE", "NODE", "STARTED"))
+	fmt.Fprintf(&sb, "  [aqua]%-12s %-14s %-8s %-10s[-]\n", "STATUS", "TYPE", "NODE", "STARTED")
 	sb.WriteString("  [gray]────────────────────────────────────────[-]\n")
 
-	// Show up to 12 most recent tasks (tasks are returned newest-first from Proxmox)
 	limit := 12
 	if len(tasks) < limit {
 		limit = len(tasks)
@@ -578,8 +557,8 @@ func (v *dashboardView) renderTasks() string {
 			startTime = t.Format("15:04:05")
 		}
 
-		sb.WriteString(fmt.Sprintf("  %s %s [gray]%-14s[-] [white]%-8s[-] [gray]%s[-]\n",
-			dot, statusStr, truncate(task.Type, 14), truncate(task.Node, 8), startTime))
+		fmt.Fprintf(&sb, "  %s %s [gray]%-14s[-] [white]%-8s[-] [gray]%s[-]\n",
+			dot, statusStr, truncate(task.Type, 14), truncate(task.Node, 8), startTime)
 	}
 
 	return sb.String()
@@ -688,15 +667,15 @@ func formatTaskStatus(task *api.ClusterTask) (label, dot string) {
 	}
 }
 
-func truncate(s string, max int) string {
+func truncate(s string, limit int) string {
 	runes := []rune(s)
-	if len(runes) <= max {
+	if len(runes) <= limit {
 		return s
 	}
 
-	if max <= 1 {
+	if limit <= 1 {
 		return "…"
 	}
 
-	return string(runes[:max-1]) + "…"
+	return string(runes[:limit-1]) + "…"
 }
