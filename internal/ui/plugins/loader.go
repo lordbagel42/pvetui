@@ -8,6 +8,7 @@ import (
 	"github.com/devnullvoid/pvetui/internal/ui/plugins/ansible"
 	"github.com/devnullvoid/pvetui/internal/ui/plugins/commandrunner"
 	"github.com/devnullvoid/pvetui/internal/ui/plugins/communityscripts"
+	"github.com/devnullvoid/pvetui/internal/ui/plugins/dashboard"
 	"github.com/devnullvoid/pvetui/internal/ui/plugins/guestlist"
 )
 
@@ -17,6 +18,7 @@ var registry = map[string]factory{
 	ansible.PluginID:          func() components.Plugin { return ansible.New() },
 	commandrunner.PluginID:    func() components.Plugin { return commandrunner.New() },
 	communityscripts.PluginID: func() components.Plugin { return communityscripts.New() },
+	dashboard.PluginID:        func() components.Plugin { return dashboard.New() },
 	guestlist.PluginID:        func() components.Plugin { return guestlist.New() },
 }
 

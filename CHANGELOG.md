@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Monitoring Dashboard plugin**: New `dashboard` plugin providing a full-screen, auto-refreshing cluster overview designed for a dedicated display. Shows cluster nodes with CPU/MEM bars, a resource summary, all running and stopped guests with live metrics, recent tasks, and optionally Nomad jobs when `plugins.dashboard.nomad_addr` is configured. Open it from the global menu (ESC → Monitoring Dashboard). Press `r` to refresh immediately, ESC or `q` to close.
+- **Nomad integration**: The dashboard plugin integrates with HashiCorp Nomad via its HTTP API (`/v1/jobs?namespace=*`). Configure with `plugins.dashboard.nomad_addr` (e.g. `http://nomad.example.com:4646`) and optional `plugins.dashboard.nomad_token` for ACL-protected clusters. When Nomad is not configured, the right panel shows a per-node guest distribution map instead.
+- **Global menu: dynamic plugin entries**: The global menu now automatically discovers and lists all plugins implementing `GlobalActionPlugin`, making plugin entries appear without hardcoded special-cases. The Ansible Toolkit and Monitoring Dashboard both appear this way.
+
 ## [1.3.3] - 2026-05-09
 
 ### Added

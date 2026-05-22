@@ -181,8 +181,20 @@ type ThemeConfig struct {
 // PluginConfig holds plugin related configuration options.
 type PluginConfig struct {
 	// Enabled lists plugin identifiers that should be activated.
-	Enabled []string            `yaml:"enabled"`
-	Ansible AnsiblePluginConfig `yaml:"ansible,omitempty"`
+	Enabled   []string              `yaml:"enabled"`
+	Ansible   AnsiblePluginConfig   `yaml:"ansible,omitempty"`
+	Dashboard DashboardPluginConfig `yaml:"dashboard,omitempty"`
+}
+
+// DashboardPluginConfig holds configuration for the monitoring dashboard plugin.
+type DashboardPluginConfig struct {
+	// NomadAddr is the base URL of the Nomad API (e.g. "http://nomad.example.com:4646").
+	// Leave empty to disable Nomad integration.
+	NomadAddr string `yaml:"nomad_addr,omitempty"`
+	// NomadToken is the ACL token for authenticated Nomad clusters. Optional.
+	NomadToken string `yaml:"nomad_token,omitempty"`
+	// RefreshSecs sets the auto-refresh interval in seconds (default: 15).
+	RefreshSecs int `yaml:"refresh_secs,omitempty"`
 }
 
 // AnsiblePluginConfig holds configuration for the ansible plugin.
