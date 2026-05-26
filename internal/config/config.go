@@ -181,8 +181,20 @@ type ThemeConfig struct {
 // PluginConfig holds plugin related configuration options.
 type PluginConfig struct {
 	// Enabled lists plugin identifiers that should be activated.
-	Enabled []string            `yaml:"enabled"`
-	Ansible AnsiblePluginConfig `yaml:"ansible,omitempty"`
+	Enabled   []string              `yaml:"enabled"`
+	Ansible   AnsiblePluginConfig   `yaml:"ansible,omitempty"`
+	Dashboard DashboardPluginConfig `yaml:"dashboard,omitempty"`
+}
+
+// DashboardPluginConfig holds configuration for the monitoring dashboard plugin.
+type DashboardPluginConfig struct {
+	// NomadAddr is the base URL of the Nomad API (e.g. "http://nomad.example.com:4646").
+	// Leave empty to disable Nomad integration.
+	NomadAddr string `yaml:"nomad_addr,omitempty"`
+	// NomadToken is the ACL token for authenticated Nomad clusters. Optional.
+	NomadToken string `yaml:"nomad_token,omitempty"`
+	// RefreshSecs sets the auto-refresh interval in seconds (default: 15).
+	RefreshSecs int `yaml:"refresh_secs,omitempty"`
 }
 
 // AnsiblePluginConfig holds configuration for the ansible plugin.
@@ -488,6 +500,11 @@ func (c *Config) MergeWithFile(path string) error {
 					FailFast             *bool  `yaml:"fail_fast"`
 				} `yaml:"bootstrap"`
 			} `yaml:"ansible"`
+			Dashboard struct {
+				NomadAddr   string `yaml:"nomad_addr"`
+				NomadToken  string `yaml:"nomad_token"`
+				RefreshSecs int    `yaml:"refresh_secs"`
+			} `yaml:"dashboard"`
 		} `yaml:"plugins"`
 		ShowIcons     *bool                          `yaml:"show_icons"`
 		GroupSettings map[string]GroupSettingsConfig `yaml:"group_settings"`
@@ -846,6 +863,17 @@ func (c *Config) MergeWithFile(path string) error {
 	}
 	if fileConfig.Plugins.Ansible.Bootstrap.FailFast != nil {
 		c.Plugins.Ansible.Bootstrap.FailFast = *fileConfig.Plugins.Ansible.Bootstrap.FailFast
+	}
+
+	// Merge dashboard plugin configuration if provided
+	if fileConfig.Plugins.Dashboard.NomadAddr != "" {
+		c.Plugins.Dashboard.NomadAddr = fileConfig.Plugins.Dashboard.NomadAddr
+	}
+	if fileConfig.Plugins.Dashboard.NomadToken != "" {
+		c.Plugins.Dashboard.NomadToken = fileConfig.Plugins.Dashboard.NomadToken
+	}
+	if fileConfig.Plugins.Dashboard.RefreshSecs > 0 {
+		c.Plugins.Dashboard.RefreshSecs = fileConfig.Plugins.Dashboard.RefreshSecs
 	}
 
 	// Merge show_icons configuration if provided

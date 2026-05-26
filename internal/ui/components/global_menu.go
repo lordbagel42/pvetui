@@ -1,6 +1,8 @@
 package components
 
 import (
+	"sort"
+
 	"github.com/devnullvoid/pvetui/internal/version"
 	"github.com/gdamore/tcell/v2"
 
@@ -12,21 +14,36 @@ func (a *App) ShowGlobalContextMenu() {
 	// Store last focused primitive
 	a.lastFocus = a.GetFocus()
 
-	ansibleEnabled := false
-	if plugin, ok := a.plugins["ansible"]; ok && plugin != nil {
-		_, ansibleEnabled = plugin.(GlobalActionPlugin)
+	// Collect plugins that expose a global action, sorted by name for stable ordering.
+	type globalEntry struct {
+		name   string
+		id     string
+		plugin GlobalActionPlugin
 	}
 
-	// Create menu items for global actions
+	var globalEntries []globalEntry
+	for id, pl := range a.plugins {
+		if pl == nil {
+			continue
+		}
+		if gp, ok := pl.(GlobalActionPlugin); ok {
+			globalEntries = append(globalEntries, globalEntry{name: pl.Name(), id: id, plugin: gp})
+		}
+	}
+	sort.Slice(globalEntries, func(i, j int) bool {
+		return globalEntries[i].name < globalEntries[j].name
+	})
+
+	// Build menu items, shortcuts, and a handler map.
 	menuItems := []string{
 		"Connection Profiles",
 		"Manage Plugins",
 	}
 	shortcuts := []rune{'p', 'm'}
 
-	if ansibleEnabled {
-		menuItems = append(menuItems, "Ansible Toolkit")
-		shortcuts = append(shortcuts, 'A')
+	for _, e := range globalEntries {
+		menuItems = append(menuItems, e.name)
+		shortcuts = append(shortcuts, 0) // no single-key shortcut for dynamic entries
 	}
 
 	menuItems = append(menuItems,
@@ -36,51 +53,54 @@ func (a *App) ShowGlobalContextMenu() {
 		"About",
 		"Quit",
 	)
-
-	// Define custom shortcuts for global menu
 	shortcuts = append(shortcuts, 'r', 'a', '?', 'i', 'q')
 
+	// Build a name→handler map so the switch below stays O(1) for static entries
+	// and global-plugin entries are handled by a single loop.
 	menu := NewContextMenuWithShortcuts(" Global Actions ", menuItems, shortcuts, func(index int, action string) {
 		a.CloseContextMenu()
 
+		// Static built-in actions
 		switch action {
 		case "Connection Profiles":
 			a.showConnectionProfilesDialog()
+			return
 		case "Manage Plugins":
 			a.showManagePluginsDialog()
-		case "Ansible Toolkit":
-			plugin, ok := a.plugins["ansible"]
-			if !ok || plugin == nil {
-				a.showMessageSafe("Ansible plugin is not enabled.")
-				return
-			}
-			globalAction, ok := plugin.(GlobalActionPlugin)
-			if !ok {
-				a.showMessageSafe("Ansible plugin does not support global actions.")
-				return
-			}
-			if err := globalAction.OpenGlobal(a.ctx, a); err != nil {
-				a.showMessageSafe("Ansible Toolkit failed: " + err.Error())
-			}
+			return
 		case "Refresh All Data":
-			// * Check if there are any pending operations
 			if models.GlobalState.HasPendingOperations() {
 				a.showMessageSafe("Cannot refresh data while there are pending operations in progress")
 				return
 			}
 			a.manualRefresh()
+			return
 		case "Toggle Auto-Refresh":
 			a.toggleAutoRefresh()
+			return
 		case "Help":
 			if a.pages.HasPage("help") {
 				a.helpModal.Hide()
 			} else {
 				a.helpModal.Show()
 			}
+			return
 		case "About":
 			a.showAboutDialog()
+			return
 		case "Quit":
 			a.showQuitConfirmation()
+			return
+		}
+
+		// Dynamic plugin actions
+		for _, e := range globalEntries {
+			if action == e.name {
+				if err := e.plugin.OpenGlobal(a.ctx, a); err != nil {
+					a.showMessageSafe(e.name + " failed: " + err.Error())
+				}
+				return
+			}
 		}
 	})
 	menu.SetApp(a)
