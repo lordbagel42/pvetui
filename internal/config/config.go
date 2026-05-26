@@ -500,6 +500,11 @@ func (c *Config) MergeWithFile(path string) error {
 					FailFast             *bool  `yaml:"fail_fast"`
 				} `yaml:"bootstrap"`
 			} `yaml:"ansible"`
+			Dashboard struct {
+				NomadAddr   string `yaml:"nomad_addr"`
+				NomadToken  string `yaml:"nomad_token"`
+				RefreshSecs int    `yaml:"refresh_secs"`
+			} `yaml:"dashboard"`
 		} `yaml:"plugins"`
 		ShowIcons     *bool                          `yaml:"show_icons"`
 		GroupSettings map[string]GroupSettingsConfig `yaml:"group_settings"`
@@ -858,6 +863,17 @@ func (c *Config) MergeWithFile(path string) error {
 	}
 	if fileConfig.Plugins.Ansible.Bootstrap.FailFast != nil {
 		c.Plugins.Ansible.Bootstrap.FailFast = *fileConfig.Plugins.Ansible.Bootstrap.FailFast
+	}
+
+	// Merge dashboard plugin configuration if provided
+	if fileConfig.Plugins.Dashboard.NomadAddr != "" {
+		c.Plugins.Dashboard.NomadAddr = fileConfig.Plugins.Dashboard.NomadAddr
+	}
+	if fileConfig.Plugins.Dashboard.NomadToken != "" {
+		c.Plugins.Dashboard.NomadToken = fileConfig.Plugins.Dashboard.NomadToken
+	}
+	if fileConfig.Plugins.Dashboard.RefreshSecs > 0 {
+		c.Plugins.Dashboard.RefreshSecs = fileConfig.Plugins.Dashboard.RefreshSecs
 	}
 
 	// Merge show_icons configuration if provided
